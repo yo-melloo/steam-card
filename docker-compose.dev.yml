@@ -1,0 +1,27 @@
+services:
+  web:
+    command: npm run dev
+    environment:
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # An anonymous volume so local node_modules doesn't overwrite container's
+      - /app/.next # Also keep Next.js build cache inside container
+
+  app:
+    build:
+      context: ./backend
+      target: build
+    # Use the build stage of Dockerfile (which has maven installed) instead of JRE stage
+    # For hot reloading/development we run mvnw spring-boot:run
+    command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "5005:5005" # Exposed debug port for your IDE
+    volumes:
+      - ./backend:/app
+      - maven_cache:/root/.m2 # Cache downloaded dependencies between restarts
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+volumes:
+  maven_cache:
