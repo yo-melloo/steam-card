@@ -1,27 +1,60 @@
 services:
-  web:
-    command: npm run dev
-    environment:
-      - WATCHPACK_POLLING=true
+  redis:
+    image: redis:alpine
+    restart: always
+    container_name: redis_dev
+    ports:
+      - "6379:6379"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules # An anonymous volume so local node_modules doesn't overwrite container's
-      - /app/.next # Also keep Next.js build cache inside container
+      - redis_data_dev:/data
 
   app:
     build:
       context: ./backend
       target: build
-    # Use the build stage of Dockerfile (which has maven installed) instead of JRE stage
-    # For hot reloading/development we run mvnw spring-boot:run
+    container_name: spring_app_dev
+    # Para o hot reloading no desenvolvimento, executamos com o plugin do maven que compila em tempo de execução
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ports:
-      - "5005:5005" # Exposed debug port for your IDE
+      - "8080:8080"
+      - "5005:5005" # Porta exposta para debug remoto no seu IDE/VS Code
     volumes:
       - ./backend:/app
-      - maven_cache:/root/.m2 # Cache downloaded dependencies between restarts
+      - maven_cache_dev:/root/.m2 # Cache de dependências do Maven para evitar downloads repetidos
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      STEAM_API_KEY: ${STEAM_API_KEY}
+    depends_on:
+      - redis
+
+  web:
+    build: ./frontend
+    container_name: next_frontend_dev
+    # Usamos o script dev no frontend para habilitar hot-rebuilds
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Impede que a pasta node_modules local apague a do container
+      - /app/.next # Cache de build do Next.js
+    depends_on:
+      - app
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy_dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+    depends_on:
+      - web
+      - app
 
 volumes:
-  maven_cache:
+  maven_cache_dev:
+  redis_data_dev:
