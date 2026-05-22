@@ -130,6 +130,56 @@ public class SteamService {
             combinedNode.set("game_count", gamesResponseNode.path("game_count"));
             combinedNode.set("games", gamesResponseNode.path("games"));
 
+            // Identificar o jogo mais jogado (Top Game)
+            int topGameId = 0;
+            long maxPlaytime = -1;
+            JsonNode gamesList = gamesResponseNode.path("games");
+            if (gamesList.isArray()) {
+                for (JsonNode game : gamesList) {
+                    long playtime = game.path("playtime_forever").asLong();
+                    if (playtime > maxPlaytime) {
+                        maxPlaytime = playtime;
+                        topGameId = game.path("appid").asInt();
+                    }
+                }
+            }
+
+            // Buscar conquistas do jogo em destaque se aplicável
+            if (topGameId > 0) {
+                try {
+                    String achievementsUrl = String.format(
+                        "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?key=%s&steamid=%s&appid=%d&l=pt",
+                        steamApiKey, steamId, topGameId
+                    );
+                    String achievementsResponse = restTemplate.getForObject(achievementsUrl, String.class);
+                    JsonNode achievementsJson = objectMapper.readTree(achievementsResponse);
+                    JsonNode playerstats = achievementsJson.path("playerstats");
+                    
+                    if (playerstats.path("success").asBoolean()) {
+                        JsonNode achievements = playerstats.path("achievements");
+                        int total = 0;
+                        int unlocked = 0;
+                        if (achievements.isArray()) {
+                            total = achievements.size();
+                            for (JsonNode achievement : achievements) {
+                                if (achievement.path("achieved").asInt() == 1) {
+                                    unlocked++;
+                                }
+                            }
+                        }
+                        ObjectNode achievementsSummary = objectMapper.createObjectNode();
+                        achievementsSummary.put("total", total);
+                        achievementsSummary.put("unlocked", unlocked);
+                        achievementsSummary.put("percentage", total > 0 ? (int) Math.round((unlocked * 100.0) / total) : 0);
+                        achievementsSummary.put("game_name", playerstats.path("gameName").asText());
+                        combinedNode.set("top_game_achievements", achievementsSummary);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao buscar conquistas para o jogo " + topGameId + ": " + e.getMessage());
+                    // Falha silenciosa para manter o fluxo principal robusto
+                }
+            }
+
             String combinedJson = objectMapper.writeValueAsString(combinedNode);
 
             // Salvar no cache do Redis
