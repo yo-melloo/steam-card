@@ -13,6 +13,53 @@
   --glass-border: rgba(102, 192, 244, 0.15);
 }
 
+@property --rotate-x {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --rotate-y {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --pointer-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --pointer-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --pointer-from-center {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --pointer-from-left {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.5;
+}
+@property --pointer-from-top {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.5;
+}
+@property --background-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --background-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -158,7 +205,7 @@ header {
 
 /* Profile Card */
 .profile-card {
-  background: linear-gradient(135deg, rgba(27, 40, 56, 0.8) 0%, rgba(15, 23, 34, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(15, 23, 34, 0.9) 0%, rgba(8, 12, 18, 0.9) 100%);
   backdrop-filter: blur(12px);
   border-radius: 24px;
   border: 1px solid var(--glass-border);
@@ -190,12 +237,69 @@ header {
   background: linear-gradient(90deg, var(--steam-primary), var(--steam-blue), var(--steam-green-light), var(--steam-primary));
   background-size: 300% 100%;
   animation: gradient-shift 8s ease infinite;
+  z-index: 3;
+}
+
+/* Card-like background texture & holographic sweep animation */
+.profile-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.08) 60%,
+      rgba(255, 255, 255, 0) 70%
+    ),
+    url('/img/grain.webp'),
+    url('/img/cosmos-bottom-trans.png'),
+    linear-gradient(
+      115deg,
+      rgba(102, 192, 244, 0.04) 0%,
+      rgba(26, 159, 255, 0.08) 25%,
+      rgba(163, 207, 6, 0.08) 50%,
+      rgba(229, 193, 88, 0.08) 75%,
+      rgba(102, 192, 244, 0.04) 100%
+    );
+  background-size: 300% 300%, 120px 120px, cover, 300% 300%;
+  background-position: -150% -150%, 0 0, center center, 0% 50%;
+  mix-blend-mode: color-dodge;
+  opacity: 0.35;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  animation: profile-card-hologram 10s ease infinite;
+}
+
+.profile-card:hover::after {
+  opacity: 0.55;
+  filter: brightness(1.25) contrast(1.1);
+}
+
+@keyframes profile-card-hologram {
+  0% {
+    background-position: -150% -150%, 0px 0px, 0% 0%, 0% 50%;
+  }
+  50% {
+    background-position: 50% 50%, 60px 40px, 50% 50%, 100% 50%;
+  }
+  100% {
+    background-position: 250% 250%, 120px 80px, 100% 100%, 0% 50%;
+  }
 }
 
 .profile-info {
   display: flex;
   align-items: center;
   gap: 24px;
+  position: relative;
+  z-index: 2;
 }
 
 .avatar-container {
@@ -259,6 +363,8 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .stat-item {
@@ -371,104 +477,7 @@ header {
   width: 280px;
 }
 
-/* Games Grid */
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
-}
 
-.game-card {
-  background: linear-gradient(135deg, rgba(27, 40, 56, 0.6) 0%, rgba(15, 23, 34, 0.6) 100%);
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  height: 100%;
-  cursor: crosshair; /* Cursor vira Crosshair sob cards de jogos */
-}
-
-.game-card:hover {
-  transform: translateY(-6px);
-  border-color: var(--steam-blue);
-  box-shadow: 0 12px 30px rgba(102, 192, 244, 0.25);
-}
-
-.game-banner-container {
-  width: 100%;
-  aspect-ratio: 460 / 215;
-  background-color: var(--steam-dark);
-  position: relative;
-  overflow: hidden;
-}
-
-.game-banner {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.game-card:hover .game-banner {
-  transform: scale(1.05);
-}
-
-.game-content {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.game-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 12px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  height: 44px;
-}
-
-.game-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  font-size: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 12px;
-}
-
-.game-playtime {
-  display: flex;
-  flex-direction: column;
-}
-
-.game-playtime .value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--steam-blue);
-  margin-top: 2px;
-}
-
-.game-last-played {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.game-last-played .value {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--steam-text-muted);
-  margin-top: 2px;
-}
 
 .label {
   color: var(--steam-text-muted);
@@ -525,163 +534,7 @@ header {
   font-size: 0.95rem;
 }
 
-/* Modal Overlay Centralizado e Responsivo */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(10, 15, 23, 0.85);
-  backdrop-filter: blur(16px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  animation: fadeIn 0.3s ease forwards;
-}
 
-.game-modal-content {
-  background: linear-gradient(135deg, rgba(27, 40, 56, 0.95) 0%, rgba(15, 23, 34, 0.95) 100%);
-  border: 1px solid rgba(102, 192, 244, 0.3);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(26, 159, 255, 0.15);
-  border-radius: 28px;
-  max-width: 550px;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.modal-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(15, 23, 34, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  font-size: 1.4rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: all 0.2s;
-}
-
-.modal-close:hover {
-  background: var(--steam-primary);
-  border-color: transparent;
-}
-
-.modal-banner-container {
-  width: 100%;
-  aspect-ratio: 460 / 215;
-  background: var(--steam-dark);
-}
-
-.modal-banner {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.modal-body {
-  padding: 28px;
-}
-
-.modal-title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 20px;
-  line-height: 1.3;
-}
-
-.modal-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.modal-stat-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 12px 16px;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-stat-item.highlight {
-  background: rgba(163, 207, 6, 0.06);
-  border-color: rgba(163, 207, 6, 0.2);
-  grid-column: span 2;
-}
-
-.modal-stat-item.highlight .value {
-  color: var(--steam-green-light);
-}
-
-.modal-stat-item .value {
-  font-size: 1.2rem;
-  font-weight: 750;
-  color: var(--steam-blue);
-  margin-top: 4px;
-}
-
-.modal-links {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.modal-link-button {
-  display: block;
-  text-align: center;
-  padding: 12px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-}
-
-.modal-link-button.store {
-  background: linear-gradient(135deg, var(--steam-primary) 0%, #0072e3 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(26, 159, 255, 0.3);
-}
-
-.modal-link-button.store:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(26, 159, 255, 0.45);
-}
-
-.modal-link-button.community {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-link-button.community:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.modal-link-button.achievements {
-  background: rgba(163, 207, 6, 0.12);
-  color: #c4f03a;
-  border: 1px solid rgba(163, 207, 6, 0.25);
-}
-
-.modal-link-button.achievements:hover {
-  background: rgba(163, 207, 6, 0.2);
-}
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -693,166 +546,605 @@ header {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Estilos de Cartas TGC Holográficas e Efeito Shiny (simey.me inspired) */
+/* Estilos de Cartas TGC Holográficas e Efeito Shiny */
 .tgc-deck-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 36px;
   justify-items: center;
-  perspective: 1000px;
   margin-top: 40px;
 }
 
 .tgc-card {
+  --translate-x: 0px;
+  --translate-y: 0px;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  --card-scale: 1;
+
   position: relative;
-  width: 220px;
-  height: 310px;
-  border-radius: 16px;
-  overflow: hidden;
-  background-color: #0d121a;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  transition: transform 0.1s ease-out, box-shadow 0.2s ease;
-  transform-style: preserve-3d;
-  cursor: crosshair;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border: 2px solid #2a3a4a;
+  width: 240px;
+  height: 335px;
+  border-radius: 14px;
+  cursor: pointer;
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), z-index 0s;
+  transform: translate3d(var(--translate-x), var(--translate-y), 0) scale(var(--card-scale));
+  transform-style: preserve-3d; /* Permite que o escalonamento afete o 3D sem borrar (Crisp) */
+  z-index: 1;
 }
 
-.tgc-card.legendary {
-  border-color: #ffd700;
-  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2), 0 0 15px rgba(255, 215, 0, 0.1);
+.tgc-card.active {
+  --card-scale: 1.6;
+  z-index: 110;
 }
 
-.tgc-card.rare {
-  border-color: #1a9fff;
-  box-shadow: 0 10px 30px rgba(26, 159, 255, 0.2), 0 0 15px rgba(26, 159, 255, 0.1);
+@keyframes idle-parallax {
+  0% {
+    --rotate-x: -3deg;
+    --rotate-y: -4deg;
+    --pointer-x: 30%;
+    --pointer-y: 35%;
+    --pointer-from-center: 0.3;
+    --pointer-from-left: 0.3;
+    --pointer-from-top: 0.35;
+    --background-x: 40%;
+    --background-y: 42%;
+    --card-opacity: 0.22;
+  }
+  50% {
+    --rotate-x: 3deg;
+    --rotate-y: 4deg;
+    --pointer-x: 70%;
+    --pointer-y: 65%;
+    --pointer-from-center: 0.3;
+    --pointer-from-left: 0.7;
+    --pointer-from-top: 0.65;
+    --background-x: 60%;
+    --background-y: 58%;
+    --card-opacity: 0.32;
+  }
+  100% {
+    --rotate-x: -3deg;
+    --rotate-y: -4deg;
+    --pointer-x: 30%;
+    --pointer-y: 35%;
+    --pointer-from-center: 0.3;
+    --pointer-from-left: 0.3;
+    --pointer-from-top: 0.35;
+    --background-x: 40%;
+    --background-y: 42%;
+    --card-opacity: 0.22;
+  }
 }
 
-.tgc-card.common {
-  border-color: #4a5a6a;
+.tgc-card:not(.interacting):not(.active) {
+  animation: idle-parallax 7s ease-in-out infinite;
 }
 
-/* Camadas Holográficas */
-.tgc-card-shine {
-  position: absolute;
-  top: 0;
-  left: 0;
+.card__translater {
   width: 100%;
   height: 100%;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  perspective: 1200px;
+  border-radius: inherit;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.card__rotator {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  background: transparent;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  outline: 1px solid transparent; /* Corrige serrilhado na rotação */
+  cursor: pointer;
+  transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  border-radius: inherit;
+  image-rendering: optimizeQuality;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.tgc-card:not(.interacting) .card__rotator,
+.tgc-card:not(.interacting) .tgc-card-shine,
+.tgc-card:not(.interacting) .tgc-card-glare {
+  transition: 
+    transform 0.4s ease-out, 
+    opacity 0.4s ease-out, 
+    box-shadow 0.25s ease,
+    --rotate-x 0.4s ease-out,
+    --rotate-y 0.4s ease-out,
+    --pointer-x 0.4s ease-out,
+    --pointer-y 0.4s ease-out,
+    --pointer-from-center 0.4s ease-out,
+    --pointer-from-left 0.4s ease-out,
+    --pointer-from-top 0.4s ease-out,
+    --background-x 0.4s ease-out,
+    --background-y 0.4s ease-out;
+}
+
+.tgc-card.active .card__rotator {
+  transform: rotateX(0deg) rotateY(180deg) !important;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+/* Shared layout for front and back - Specificity override to beat base.css wildcard */
+.card__rotator .tgc-card-front,
+.card__rotator .tgc-card-back {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 17px;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  border-radius: 14px !important; /* Encaixe perfeito com o contêiner externo */
+  border: 5px solid #4a545e !important; /* Borda base padrão */
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  overflow: hidden !important;
+  will-change: transform;
+  outline: 1px solid transparent; /* Corrige o serrilhado (aliasing) de bordas em 3D */
+  -webkit-font-smoothing: antialiased; /* Suavização de fontes em WebKit */
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Front face: hide when flipped away */
+.card__rotator .tgc-card-front {
+  background-image: linear-gradient(135deg, #111827 0%, #070b11 100%);
+  z-index: 2;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0.01px);
+}
+
+/* Element-Specific Card Front Backgrounds and inner borders */
+.card.water .tgc-card-front {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(102, 192, 244, 0.3) !important;
+}
+.card.colorless .tgc-card-front {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+.card.grass .tgc-card-front {
+  background: linear-gradient(135deg, #115e59 0%, #064e3b 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(163, 207, 6, 0.3) !important;
+}
+.card.darkness .tgc-card-front {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(147, 51, 234, 0.25) !important;
+}
+
+/* Back face: starts rotated 180deg, becomes visible when card is flipped */
+.card__rotator .tgc-card-back {
+  background-color: #0b0f19;
+  background-image: radial-gradient(circle at 50% 50%, #152232 0%, #070a10 100%);
+  transform: rotateY(180deg) translateZ(1px);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+  pointer-events: auto !important; /* Permite cliques nos links no verso */
+}
+
+/* Habilitar clicks em todos os filhos do verso */
+.card__rotator .tgc-card-back * {
+  pointer-events: auto !important;
+}
+
+.tgc-card.legendary .card__rotator {
+  box-shadow: 0 10px 30px rgba(229, 193, 88, 0.2), 0 0 15px rgba(229, 193, 88, 0.1) !important;
+}
+.tgc-card.legendary .tgc-card-front,
+.tgc-card.legendary .tgc-card-back {
+  border-color: #e5c158 !important; /* Premium Gold Border */
+}
+
+.tgc-card.rare .card__rotator {
+  box-shadow: 0 10px 30px rgba(91, 163, 213, 0.2), 0 0 15px rgba(91, 163, 213, 0.1) !important;
+}
+.tgc-card.rare .tgc-card-front,
+.tgc-card.rare .tgc-card-back {
+  border-color: #5ba3d5 !important; /* Rare Cyan Border */
+}
+
+.tgc-card.common .tgc-card-front,
+.tgc-card.common .tgc-card-back {
+  border-color: #4a545e !important; /* Common Slate Border */
+}
+
+/* Variáveis Solares para Reflexos (Sunpillars) */
+:root {
+  --sunpillar-1: hsl(2, 100%, 73%);
+  --sunpillar-2: hsl(53, 100%, 69%);
+  --sunpillar-3: hsl(93, 100%, 69%);
+  --sunpillar-4: hsl(176, 100%, 76%);
+  --sunpillar-5: hsl(228, 100%, 74%);
+  --sunpillar-6: hsl(283, 100%, 73%);
+  
+  --violet: hsl(283, 100%, 73%);
+  --blue: hsl(228, 100%, 74%);
+  --green: hsl(93, 100%, 69%);
+  --yellow: hsl(53, 100%, 69%);
+  --red: hsl(2, 100%, 73%);
+}
+
+/* Camadas Holográficas Base */
+.card__rotator .tgc-card-shine,
+.card__rotator .tgc-card-glare {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.card__rotator .tgc-card-shine {
+  background: transparent;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.8) contrast(1.5) saturate(0.4);
+  mix-blend-mode: color-dodge;
+  opacity: var(--card-opacity, 0);
+}
+
+.card__rotator .tgc-card-shine:before,
+.card__rotator .tgc-card-shine:after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+}
+
+.card__rotator .tgc-card-glare {
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsla(0, 0%, 100%, 0.8) 10%,
+    hsla(0, 0%, 100%, 0.65) 20%,
+    hsla(0, 0%, 0%, 0.5) 90%
+  );
+  opacity: var(--card-opacity, 0);
+  mix-blend-mode: overlay;
+}
+
+.card__rotator .tgc-card-glare:after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* ----------------------------------------------------
+   FAITHFUL STYLES: RARE (Baseado no Regular Holo)
+------------------------------------------------------- */
+.tgc-card.rare .tgc-card-shine {
+  --scanlines-space: 1px;
+  --scanlines-light: #666;
+  --scanlines-dark: black;
+  --bars: 3%;
+  --bar-color: hsla(0, 0%, 70%, 1);
+  --bar-bg: hsla(0, 0%, 0%, 1);
+
+  background-image: 
+    repeating-linear-gradient( 110deg, 
+      var(--violet), var(--blue), var(--green), var(--yellow), var(--red), 
+      var(--violet), var(--blue), var(--green), var(--yellow), var(--red)
+    ),
+    repeating-linear-gradient( 90deg, 
+      var(--scanlines-dark) calc(var(--scanlines-space) * 0), var(--scanlines-dark) calc(var(--scanlines-space) * 2),
+      var(--scanlines-light) calc(var(--scanlines-space) * 2), var(--scanlines-light) calc(var(--scanlines-space) * 4)
+    );
+
+  background-position: 
+    calc(((50% - var(--background-x, 50%)) * 2.6) + 50%) calc(((50% - var(--background-y, 50%)) * 3.5) + 50%),
+    center center;
+
+  background-size: 400% 400%, cover;
+  background-blend-mode: overlay;
+  filter: brightness(1.1) contrast(1.1) saturate(1.2);
   mix-blend-mode: color-dodge;
 }
 
-.tgc-card:hover .tgc-card-shine {
-  opacity: var(--opacity, 0.6);
+.tgc-card.rare .tgc-card-shine:before {
+  background-image:
+    repeating-linear-gradient( 90deg, 
+      var(--bar-bg) calc(var(--bars)*2), 
+      var(--bar-color) calc(var(--bars)*3), 
+      var(--bar-bg) calc(var(--bars)*3.5), 
+      var(--bar-color) calc(var(--bars)*4), 
+      var(--bar-bg) calc(var(--bars)*5), 
+      var(--bar-bg) calc(var(--bars)*14)
+    );
+  background-position: calc((((50% - var(--background-x, 50%)) * 1.65) + 50% ) + (var(--background-y, 50%) * 0.5)) var(--background-x, 50%);
+  background-size: 200% 200%;
+  background-blend-mode: screen;
+  filter: brightness(1.15) contrast(1.1);
+  mix-blend-mode: hard-light;
 }
 
-/* Efeito Holográfico Foil de Rarity (Poke-Holo style) */
+.tgc-card.rare .tgc-card-shine:after {
+  background-image: radial-gradient( 
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+    hsla(0, 0%, 90%, 0.8) 0%, hsla(0, 0%, 78%, 0.1) 25%, hsl(0, 0%, 0%) 90% 
+  );
+  mix-blend-mode: luminosity; 
+  filter: brightness(0.6) contrast(4);
+}
+
+.tgc-card.rare .tgc-card-glare {
+  opacity: calc(var(--card-opacity, 0) * .8);
+  filter: brightness(0.8) contrast(1.5);
+  mix-blend-mode: overlay;
+}
+
+.tgc-card.rare .tgc-card-glare:after {
+  background-image: radial-gradient( 
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+    hsl(180, 100%, 95%) 5%, hsla(0, 0%, 39%, 0.25) 55%, hsla(0, 0%, 0%, 0.36) 110% 
+  );
+  mix-blend-mode: overlay;
+  filter: brightness(.6) contrast(3);
+}
+
+/* ----------------------------------------------------
+   FAITHFUL STYLES: LEGENDARY (Baseado no Cosmos Holo)
+------------------------------------------------------- */
 .tgc-card.legendary .tgc-card-shine {
-  background: 
-    radial-gradient(
-      circle at calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%),
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(255, 200, 0, 0.3) 25%,
-      rgba(255, 0, 128, 0.2) 50%,
-      transparent 80%
-    ),
-    linear-gradient(
-      115deg,
-      transparent 0%,
-      rgba(255, 0, 0, 0.2) 20%,
-      rgba(255, 120, 0, 0.2) 30%,
-      rgba(255, 255, 0, 0.2) 40%,
-      rgba(0, 255, 0, 0.2) 50%,
-      rgba(0, 255, 255, 0.2) 60%,
-      rgba(0, 0, 255, 0.2) 70%,
-      rgba(128, 0, 128, 0.2) 80%,
-      transparent 100%
-    );
-  background-size: 150% 150%;
-  background-position: calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%);
+  --space: 4%;
+  background-image: 
+    url("/img/cosmos-bottom.png"), 
+    repeating-linear-gradient(82deg, 
+      hsl(53, 65%, 60%) calc(var(--space)*1), hsl(93, 56%, 50%) calc(var(--space)*2), 
+      hsl(176, 54%, 49%) calc(var(--space)*3), hsl(228, 59%, 55%) calc(var(--space)*4), 
+      hsl(283, 60%, 55%) calc(var(--space)*5), hsl(326, 59%, 51%) calc(var(--space)*6), 
+      hsl(326, 59%, 51%) calc(var(--space)*7), hsl(283, 60%, 55%) calc(var(--space)*8), 
+      hsl(228, 59%, 55%) calc(var(--space)*9), hsl(176, 54%, 49%) calc(var(--space)*10), 
+      hsl(93, 56%, 50%) calc(var(--space)*11), hsl(53, 65%, 60%) calc(var(--space)*12) 
+    ), 
+    radial-gradient( farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+      hsla(180, 100%, 89%, 0.55) 5%, hsla(180, 14%, 57%, 0.3) 40%, hsl(0, 0%, 0%) 130% 
+  );
+  background-blend-mode: color-burn, multiply;
+  background-position: 
+    var(--cosmosbg, center center),
+    calc(10% + (var(--pointer-from-left, 0.5) * 80%)) calc(10% + (var(--pointer-from-top, 0.5) * 80%)), 
+    center center;
+  background-size: cover, 400% 900%, cover;
+  filter: brightness(0.8) contrast(1.1) saturate(0.65);
+  mix-blend-mode: color-dodge;
 }
 
-.tgc-card.rare .tgc-card-shine {
-  background: 
-    radial-gradient(
-      circle at calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%),
-      rgba(255, 255, 255, 0.6) 0%,
-      rgba(0, 114, 227, 0.3) 30%,
-      rgba(0, 255, 255, 0.2) 60%,
-      transparent 90%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 10px,
-      rgba(255, 255, 255, 0.1) 10px,
-      rgba(255, 255, 255, 0.1) 20px
+.tgc-card.legendary .tgc-card-shine:before {
+  content: "";
+  z-index: 2;
+  background-image: 
+    url("/img/cosmos-middle-trans.png"),
+    repeating-linear-gradient(82deg, 
+      hsl(53, 65%, 60%) calc(var(--space)*1), hsl(93, 56%, 50%) calc(var(--space)*2), 
+      hsl(176, 54%, 49%) calc(var(--space)*3), hsl(228, 59%, 55%) calc(var(--space)*4), 
+      hsl(283, 60%, 55%) calc(var(--space)*5), hsl(326, 59%, 51%) calc(var(--space)*6),
+      hsl(326, 59%, 51%) calc(var(--space)*7), hsl(283, 60%, 55%) calc(var(--space)*8), 
+      hsl(228, 59%, 55%) calc(var(--space)*9), hsl(176, 54%, 49%) calc(var(--space)*10), 
+      hsl(93, 56%, 50%) calc(var(--space)*11), hsl(53, 65%, 60%) calc(var(--space)*12)
     );
-  background-size: 120% 120%;
-  background-position: calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%);
+  background-blend-mode: lighten, multiply;
+  background-position: 
+    var(--cosmosbg, center center),
+    calc(15% + (var(--pointer-from-left, 0.5) * 70%)) calc(15% + (var(--pointer-from-top, 0.5) * 70%)),
+    center center;
+  background-size: cover, 400% 900%, cover;
+  filter: brightness(1.0) contrast(1.3) saturate(0.65);
+  mix-blend-mode: overlay;
+}
+
+.tgc-card.legendary .tgc-card-shine:after {
+  content: "";
+  z-index: 3;
+  background-image: 
+    url("/img/cosmos-top-trans.png"),
+    repeating-linear-gradient(82deg, 
+      hsl(53, 65%, 60%) calc(var(--space)*1), hsl(93, 56%, 50%) calc(var(--space)*2), 
+      hsl(176, 54%, 49%) calc(var(--space)*3), hsl(228, 59%, 55%) calc(var(--space)*4), 
+      hsl(283, 60%, 55%) calc(var(--space)*5), hsl(326, 59%, 51%) calc(var(--space)*6),
+      hsl(326, 59%, 51%) calc(var(--space)*7), hsl(283, 60%, 55%) calc(var(--space)*8), 
+      hsl(228, 59%, 55%) calc(var(--space)*9), hsl(176, 54%, 49%) calc(var(--space)*10), 
+      hsl(93, 56%, 50%) calc(var(--space)*11), hsl(53, 65%, 60%) calc(var(--space)*12)
+    );
+  background-blend-mode: multiply, multiply;
+  background-position: 
+    var(--cosmosbg, center center),
+    calc(20% + (var(--pointer-from-left, 0.5) * 60%)) calc(20% + (var(--pointer-from-top, 0.5) * 60%)),
+    center center;
+  background-size: cover, 400% 900%, cover;
+  filter: brightness(0.9) contrast(1.2) saturate(0.65);
+  mix-blend-mode: multiply;
+}
+
+.tgc-card.legendary .tgc-card-glare {
+  background-image: radial-gradient( 
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+    hsla(204, 100%, 95%, 0.8) 5%, hsla(250, 15%, 20%, 1) 150% 
+  );
+  filter: brightness(.75) contrast(2) saturate(2);
+  mix-blend-mode: overlay;
+  opacity: calc(var(--card-opacity, 0) * (0.25 + var(--pointer-from-center, 0.5)));
+}
+
+.tgc-card.legendary .tgc-card-glare:after {
+  background-image: radial-gradient( 
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
+    hsl(280, 100%, 96%) 5%, hsl(0, 0%, 10%) 60%
+  );
+  filter: brightness(.75) contrast(2.5) saturate(2);
+  mix-blend-mode: soft-light;
+  opacity: calc(1 - var(--pointer-from-top, 0.5) * .75);
+}
+
+/* ----------------------------------------------------
+   FAITHFUL STYLES: COMMON (Baseado em Basic Foil)
+------------------------------------------------------- */
+@keyframes standard-shimmer {
+  0% {
+    background-position: -150% -150%;
+  }
+  100% {
+    background-position: 250% 250%;
+  }
 }
 
 .tgc-card.common .tgc-card-shine {
-  background: 
-    linear-gradient(
-      105deg,
-      transparent 30%,
-      rgba(255, 255, 255, 0.12) 45%,
-      rgba(255, 255, 255, 0.25) 50%,
-      rgba(255, 255, 255, 0.12) 55%,
-      transparent 70%
-    );
-  background-size: 200% 200%;
-  background-position: calc((var(--mx, 50) - 50) * 2% + 50%) calc((var(--my, 50) - 50) * 2% + 50%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.08) 60%,
+    rgba(255, 255, 255, 0) 70%
+  ) !important;
+  background-size: 300% 300% !important;
+  background-position: -150% -150%;
+  mix-blend-mode: overlay !important;
+  filter: brightness(1.3) contrast(1.2);
+  opacity: var(--card-opacity, 0);
+  transition: opacity 0.4s ease-out;
 }
 
-/* Elementos Internos da Carta TGC */
-.tgc-card-header {
-  display: flex;
+.tgc-card.common.interacting .tgc-card-shine {
+  animation: standard-shimmer 2.2s ease-in-out infinite;
+  opacity: 0.75;
+}
+
+/* Elementos Internos da Carta TGC - Resolvendo especificidade e conflito de Grid do base.css */
+.card__rotator .tgc-card-header {
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   z-index: 2;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  pointer-events: auto !important;
 }
 
-.tgc-card-title {
+.card__rotator .tgc-card-title {
   font-size: 0.8rem;
   font-weight: 800;
   color: white;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  max-width: 165px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: block !important;
 }
 
-.tgc-card-element {
-  font-size: 0.9rem;
+.card__rotator .tgc-card-element {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50%;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 2;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
 }
 
-.tgc-card-frame {
-  width: 100%;
-  aspect-ratio: 460 / 215;
-  border-radius: 8px;
+.card__rotator .tgc-card-element svg {
+  width: 12px !important;
+  height: 12px !important;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
+  display: inline-block !important;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+}
+
+/* Estilos de Elemento por Plataforma */
+.card__rotator .tgc-card-element[title*="Windows"] {
+  background: radial-gradient(circle at 35% 35%, #00bcef 0%, #0078d4 70%, #005a9e 100%) !important;
+  border-color: rgba(0, 188, 239, 0.6) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 120, 212, 0.4) !important;
+}
+
+.card__rotator .tgc-card-element[title*="macOS"] {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d1d5db 60%, #9ca3af 100%) !important;
+  color: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 255, 255, 0.3) !important;
+}
+
+.card__rotator .tgc-card-element[title*="macOS"] svg {
+  fill: #111827 !important;
+}
+
+.card__rotator .tgc-card-element[title*="Linux"] {
+  background: radial-gradient(circle at 35% 35%, #ffea79 0%, #ffb900 60%, #ff8c00 100%) !important;
+  color: #111827 !important;
+  border-color: rgba(255, 234, 121, 0.7) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 185, 0, 0.4) !important;
+}
+
+.card__rotator .tgc-card-element[title*="Linux"] svg {
+  fill: #111827 !important;
+}
+
+.card__rotator .tgc-card-element[title*="Steam"] {
+  background: radial-gradient(circle at 35% 35%, #2a475e 0%, #171a21 80%, #000000 100%) !important;
+  border-color: rgba(102, 192, 244, 0.4) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px rgba(102, 192, 244, 0.2) !important;
+}
+
+.card__rotator .tgc-card-frame {
+  width: 100% !important;
+  aspect-ratio: 460 / 215 !important;
+  border-radius: 6px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid #1f2a37;
   background: var(--steam-dark);
   margin-bottom: 8px;
   z-index: 2;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(255, 255, 255, 0.05);
+  grid-area: auto !important;
+  display: block !important;
 }
 
-.tgc-card-image {
-  width: 100%;
-  height: 100%;
+.card__rotator .tgc-card-image {
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  display: block !important;
 }
 
-.tgc-card-type {
+.card__rotator .tgc-card-type {
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -861,23 +1153,31 @@ header {
   padding-bottom: 4px;
   margin-bottom: 8px;
   z-index: 2;
+  letter-spacing: 0.3px;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: block !important;
 }
 
-.tgc-card-desc {
+.card__rotator .tgc-card-desc {
   font-size: 0.7rem;
   color: var(--steam-text-light);
   line-height: 1.3;
   margin-bottom: 10px;
-  display: -webkit-box;
+  display: -webkit-box !important;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
   z-index: 2;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
 }
 
-.tgc-card-stats {
-  display: flex;
+.card__rotator .tgc-card-stats {
+  display: flex !important;
   justify-content: space-between;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 8px;
@@ -886,14 +1186,25 @@ header {
   font-weight: 800;
   font-size: 0.75rem;
   z-index: 2;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
 }
 
-.tgc-card-stats .atk {
+.card__rotator .tgc-card-stats .atk {
   color: var(--steam-blue);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: inline-block !important;
 }
 
-.tgc-card-stats .def {
+.card__rotator .tgc-card-stats .def {
   color: var(--steam-green-light);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: inline-block !important;
 }
 
 /* Rota Secreta Custom Header e Voltar */
@@ -950,3 +1261,195 @@ header {
     grid-column: span 1;
   }
 }
+
+/* Detalhes do Verso do Card TGC */
+.card__rotator .tgc-card-back-header {
+  display: flex !important;
+  flex-direction: column;
+  gap: 2px;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+}
+
+.card__rotator .tgc-card-back-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffd700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: block !important;
+}
+
+.card__rotator .tgc-card-back-app-id {
+  font-size: 0.65rem;
+  color: var(--steam-text-muted);
+  font-weight: 600;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: block !important;
+}
+
+.card__rotator .tgc-card-back-divider {
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3) 50%, transparent);
+  margin: 6px 0;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.card__rotator .tgc-card-back-body {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+}
+
+.card__rotator .tgc-back-stat-row {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 4px 8px;
+  border-radius: 6px;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+}
+
+.card__rotator .tgc-back-stat-row.highlight {
+  background: rgba(255, 136, 0, 0.06);
+  border-color: rgba(255, 136, 0, 0.15);
+}
+
+.card__rotator .tgc-back-stat-row.highlight .value {
+  color: #ff8800;
+  font-weight: 700;
+}
+
+.card__rotator .tgc-back-stat-row .label {
+  color: var(--steam-text-muted);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: inline-block !important;
+}
+
+.card__rotator .tgc-back-stat-row .value {
+  color: #f3f4f6;
+  font-weight: 600;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  display: inline-block !important;
+}
+
+.card__rotator .tgc-back-stat-row .platform-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+}
+
+.card__rotator .tgc-back-stat-row .platform-badge svg {
+  width: 11px !important;
+  height: 11px !important;
+  color: var(--steam-blue);
+  display: inline-block !important;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+}
+
+.card__rotator .tgc-card-back-footer {
+  display: flex !important;
+  gap: 8px;
+  margin-top: 8px;
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  width: auto !important;
+  pointer-events: auto !important;
+}
+
+.card__rotator .tgc-back-btn {
+  flex: 1 !important;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  grid-area: auto !important;
+  aspect-ratio: auto !important;
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+.card__rotator .tgc-back-btn.store {
+  background: linear-gradient(135deg, #ff8800 0%, #ff4400 100%) !important;
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(255, 136, 0, 0.2);
+}
+
+.card__rotator .tgc-back-btn.store:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 136, 0, 0.4);
+}
+
+.card__rotator .tgc-back-btn.community {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white;
+}
+
+.card__rotator .tgc-back-btn.community:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.card__rotator .tgc-back-btn.achievements {
+  background: rgba(163, 207, 6, 0.12) !important;
+  color: #c4f03a;
+  border-color: rgba(163, 207, 6, 0.25) !important;
+}
+
+.card__rotator .tgc-back-btn.achievements:hover {
+  background: rgba(163, 207, 6, 0.25) !important;
+}
+
+/* Backdrop Blur para o Card Ativo */
+.modal-backdrop-blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 15, 23, 0.7);
+  backdrop-filter: blur(12px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop-blur.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+

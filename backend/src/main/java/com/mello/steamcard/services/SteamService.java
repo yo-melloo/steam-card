@@ -192,4 +192,43 @@ public class SteamService {
             throw new RuntimeException("Falha ao carregar dados da Steam: " + e.getMessage(), e);
         }
     }
+
+    public String getGameDescription(int appid) {
+        String cacheKey = "steam:game:description:" + appid;
+        try {
+            String cached = redisTemplate.opsForValue().get(cacheKey);
+            if (cached != null) {
+                return cached;
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao ler do Redis para appid " + appid + ": " + e.getMessage());
+        }
+
+        String fallback = "Este card representa a licença oficial de jogo registrada na rede Steam.";
+        String url = "https://store.steampowered.com/api/appdetails?appids=" + appid + "&l=portuguese";
+        
+        try {
+            String response = restTemplate.getForObject(url, String.class);
+            JsonNode root = objectMapper.readTree(response);
+            JsonNode appNode = root.path(String.valueOf(appid));
+            
+            if (appNode.path("success").asBoolean()) {
+                String desc = appNode.path("data").path("short_description").asText();
+                if (desc != null && !desc.trim().isEmpty()) {
+                    // Limpeza de tags HTML caso existam
+                    desc = desc.replaceAll("<[^>]*>", "").trim();
+                    try {
+                        redisTemplate.opsForValue().set(cacheKey, desc, Duration.ofDays(7));
+                    } catch (Exception e) {
+                        System.err.println("Erro ao salvar no Redis para appid " + appid + ": " + e.getMessage());
+                    }
+                    return desc;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao obter descrição da Steam para appid " + appid + ": " + e.getMessage());
+        }
+        
+        return fallback;
+    }
 }

@@ -42,6 +42,9 @@ build/
 *.log
 .next/
 
+### Reference repos (local only) ###
+pokemon-cards-reference/
+
 ### Maven ###
 target/
 !**/src/main/**/target/
